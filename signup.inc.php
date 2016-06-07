@@ -3,13 +3,13 @@
 	 include 'config.inc.php';
 	 
 	 // Check whether username or password is set from android	
-     if(isset($_POST['username']) && isset($_POST['password']))
+     if(isset($_POST['username']) && isset($_POST['password']) && isset($_POST['email']))
      {
 		  // Innitialize Variable
 		      $result='';
 	   	    $username = $_POST['username'];
           $password = $_POST['password'];
-          $email = "f2013364@goa.bits-pilani.ac.in";
+          $email = $_POST['email'];
 		  
 		  // Query database for row exist or not
 		  $sql = 'SELECT * FROM users WHERE  email = :user_email';
@@ -43,7 +43,7 @@
 	          		  $message = "     
 				      Hello $username,
 				      <br /><br />
-				      Welcome to Coding Cage!<br/>
+				      Welcome to PayApp!<br/>
 				      To complete your registration  please , just click following link<br/>
 				      <br /><br />
 				      <a href='http://www.SITE_URL.com/verify.php?id=$id&code=$code'>Click HERE to Activate :)</a>
@@ -63,8 +63,8 @@
 					  $mail->AddAddress($email);
 					  $mail->Username="rohit19081995@gmail.com";  
 					  $mail->Password="r4o3h2i1t@googlemail";            
-					  $mail->SetFrom('you@yourdomain.com','Coding Cage');
-					  $mail->AddReplyTo("you@yourdomain.com","Coding Cage");
+					  $mail->SetFrom('rohit19081995@gmail.com','PayApp Account Verification');
+					  $mail->AddReplyTo("rohit19081995@gmail.com","PayApp Customer Service");
 					  $mail->Subject    = $subject;
 					  $mail->MsgHTML($message);
 					  $mail->Send();
@@ -75,7 +75,6 @@
 		  
 		  // send result back to android
    		  echo $result;
-   		  echo "hello";
   	}
 	
 ?>
