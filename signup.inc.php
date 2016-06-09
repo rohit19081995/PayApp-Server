@@ -16,7 +16,7 @@
           $stmt = $conn->prepare($sql);
           $stmt->bindParam(':user_email', $email, PDO::PARAM_STR);
           $stmt->execute();
-          if ($stmt->rowCount) {
+          if ($conn->query("SELECT FOUND_ROWS()")->fetchColumn() > 0) {
           	$result = "email registered";
           }
           else {
@@ -24,29 +24,29 @@
 	          $stmt = $conn->prepare($sql);
 	          $stmt->bindParam(':username', $username, PDO::PARAM_STR);
 	          $stmt->execute();
-	          if($stmt->rowCount())
+	          if($stmt->rowCount() >0)
 	          {
 				      $result="user already exists";	
 	          }  
-	          elseif(!$stmt->rowCount())
-	          {
+	          else
+	          {		  $code = md5(uniqid(rand()));
 				  	  $sql = "INSERT INTO `users` (`id`, `username`, `email`, `password`, `activation_code`, `activated`) VALUES (NULL, :username, :useremail, :password, :activcode, :activated)";
 	          		  $stmt = $conn->prepare($sql);
 	          		  $stmt->bindParam(':username', $username, PDO::PARAM_STR);
 	          		  $stmt->bindParam(':useremail', $email, PDO::PARAM_STR);
 	          		  $stmt->bindParam(':password', md5($password), PDO::PARAM_STR);
-	          		  $code = md5(uniqid(rand()));
 	          		  $stmt->bindParam(':activcode', $code, PDO::PARAM_STR);
-	          		  $stmt->bindParam(':activated', $a = 0, PDO::PARAM_STR);
+	          		  $stmt->bindParam(':activated', $a = 'N', PDO::PARAM_STR);
 	          		  $stmt->execute();
-
+	          		  $id = $conn->lastInsertId();
+	          		  $baseid = base64_encode($id);
 	          		  $message = "     
 				      Hello $username,
 				      <br /><br />
 				      Welcome to PayApp!<br/>
-				      To complete your registration  please , just click following link<br/>
+				      To complete your registration, just click following link<br/>
 				      <br /><br />
-				      <a href='http://www.SITE_URL.com/verify.php?id=$id&code=$code'>Click HERE to Activate :)</a>
+				      <a href='http://192.168.1.5/webservice/verify.inc.php?id=$baseid&code=$code'>CLICK HERE TO ACTIVATE YOUR ACCOUNT</a>
 				      <br /><br />
 				      Thanks,";
 
@@ -61,15 +61,23 @@
 					  $mail->Host       = "smtp.gmail.com";      
 					  $mail->Port       = 465;             
 					  $mail->AddAddress($email);
-					  $mail->Username="rohit19081995@gmail.com";  
-					  $mail->Password="r4o3h2i1t@googlemail";            
+					  $mail->Username="csmdstudios.payapp@gmail.com";  
+					  $mail->Password="PcasymAdppstudios";            
 					  $mail->SetFrom('rohit19081995@gmail.com','PayApp Account Verification');
 					  $mail->AddReplyTo("rohit19081995@gmail.com","PayApp Customer Service");
 					  $mail->Subject    = $subject;
 					  $mail->MsgHTML($message);
-					  $mail->Send();
+					  if($mail->Send()) {
+					  	$result="user added";
+					  }
+					  else {
+					  	$result="mail failed";
+					  	$sql = "DELETE FROM `users` WHERE `users`.`id` = :id";
+					  	$stmt = $conn->prepare($sql);
+					  	$stmt->bindParam(':id', $id, PDO::PARAM_STR);
+					  	$stmt->execute();
 
-	          		  $result="user added";
+					  }
 	          }
 	      }
 		  

@@ -8,7 +8,7 @@
 		  // Innitialize Variable
 		      $result='';
 	   	    $username = $_POST['username'];
-          $password = $_POST['password'];
+          $password = md5($_POST['password']);
 		  
 		  // Query database for row exist or not
           $sql = 'SELECT * FROM users WHERE  username = :username AND password = :password';
@@ -18,12 +18,20 @@
           $stmt->execute();
           if($stmt->rowCount())
           {
-			      $result="true";	
+            $res = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($res['activated'] == 'Y') {
+              $result="true";
+            }
+            else {
+              $result = "verify";
+            }
+			      	
           }  
           elseif(!$stmt->rowCount())
           {
 			  	  $result="false";
           }
+            
 		  
 		  // send result back to android
    		  echo $result;
